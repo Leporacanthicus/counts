@@ -1,4 +1,5 @@
 #include <iostream>
+#include <iomanip>
 #include <string>
 #include <vector>
 #include <assert.h>
@@ -41,6 +42,7 @@ entry parse(const std::string& line)
     return e;
 }
 
+
 int main()
 {
     std::string line;
@@ -51,7 +53,27 @@ int main()
 	lineno++;
 	if (started)
 	{
+#if 1
+/* Bland de författare som klassats som anhängare var välkända och uttalade skeptiker som 
+   Willie Soon, Craig Idso, Nicola Scafetta, Nir Shaviv, Nils-Axel Morner and Alan Carlin. */
+
+	    entry e = parse(line);
+	    const char *names[] = { "Soon", "Idso", "Scafetta", "Shaviv", "Morner", "Carlin" };
+	    bool skip = false;
+	    for(auto n : names)
+	    {
+		if (e.authors.find(n) != std::string::npos)
+		{
+		    skip = true;
+		}
+	    }
+	    if (!skip)
+	    {
+		v.push_back(e);
+	    }
+#else
 	    v.push_back(parse(line));
+#endif
 	}
 	if (!started && line.substr(0, 4) == "Year")
 	{
@@ -67,9 +89,20 @@ int main()
     int total = 0;
     for(int i = 1; i < 8; i++)
     {
-	std::cout << i << " " << counts[i] << std::endl;
 	total += counts[i];
     }
-    std::cout << "T " << total << std::endl;
-    
+    int total_less_4 = total -counts[4];
+
+    std::cout << "Total: " << total << " Less undecided: " << total_less_4 << std::endl;
+    for(int i = 1; i < 8; i++)
+    {
+	double perc = 100.0 * counts[i] / total; 
+	double perc_less_4 = 100.0 * counts[i] / total_less_4;
+	// Only give percentage for  this for "not 4" values.
+	if (i == 4) perc_less_4 = 0; 
+	std::cout << i << " " << std::setw(6) << counts[i] << " " 
+		  << std::setw(10) << std::fixed << std::setprecision(2) << perc << "% " 
+		  << std::setw(10) << perc_less_4 << "%" << std::endl;
+    }
 }
+
